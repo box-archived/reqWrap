@@ -1,2 +1,2 @@
 class RequestsFailureWarning(Warning):
-    """ Max retry reached """
+    """ Max retries exceed """
