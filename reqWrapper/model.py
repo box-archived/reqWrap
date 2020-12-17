@@ -4,7 +4,7 @@ from requests import Response, Session
 
 
 class SafeResponse(object):
-    def __init__(self, success, response, session):
+    def __init__(self, success, response=None, session=None):
         self.__success: bool = success
         self.__response: Response = response
         self.__session: Session = session
