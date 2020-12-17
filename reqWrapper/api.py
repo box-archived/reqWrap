@@ -2,7 +2,9 @@
 
 from time import sleep
 from requests import Session
+from warnings import warn
 from .model import SafeResponse
+from .exception import RequestsFailureWarning
 
 
 def request(method, url, session=None, retry=5, wait=1, need_200=False, **kwargs):
@@ -10,7 +12,24 @@ def request(method, url, session=None, retry=5, wait=1, need_200=False, **kwargs
     if session is None:
         session = Session()
 
-    session.request(method=method, url=url, **kwargs)
+    try_count = 0
+
+    while try_count < retry:
+        try_count += 1
+        if try_count != 1:
+            sleep(wait)
+        print("try #%s" % try_count)
+        try:
+            res = session.request(method=method, url=url, **kwargs)
+            session.close()
+            if need_200 and res.status_code != 200:
+                continue
+            else:
+                return SafeResponse(success=True, response=res, session=session)
+        except Exception:
+            continue
+    warn("Max retries exceed", RequestsFailureWarning)
+    return SafeResponse(success=False)
 
 
 def get(url, params=None, retry=5, wait=1, need_200=False, **kwargs):
