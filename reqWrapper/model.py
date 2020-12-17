@@ -10,17 +10,26 @@ class SafeResponse(object):
         self.__session: Session = session
 
     @property
-    def response(self):
-        return self.__response
-
-    @property
     def success(self):
         return self.__success
 
     @property
+    def response(self):
+        if self.success:
+            return self.__response
+        else:
+            return None
+
+    @property
     def status_code(self):
-        return self.__response.status_code
+        if self.success:
+            return self.__response.status_code
+        else:
+            return None
 
     @property
     def session(self):
-        return self.__session
+        if self.success:
+            return self.__session
+        else:
+            return None
