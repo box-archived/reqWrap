@@ -9,6 +9,13 @@ class SafeResponse(object):
         self.__response: Response = response
         self.__session: Session = session
 
+    def __repr__(self):
+        if self.success:
+            status = "Success: %s" % self.response.status_code
+        else:
+            status = "Failed"
+        return '<SafeResponse [%s]>' % status
+
     @property
     def success(self):
         return self.__success
