@@ -4,7 +4,6 @@ from time import sleep
 from requests import Session
 from warnings import warn
 from .model import SafeResponse
-from .exception import RequestsFailureWarning
 
 
 def request(method, url, session=None, retry=5, wait=1, need_200=False, **kwargs):
@@ -27,7 +26,6 @@ def request(method, url, session=None, retry=5, wait=1, need_200=False, **kwargs
                 return SafeResponse(success=True, response=res, session=session)
         except Exception:
             continue
-    warn("Max retries exceed", RequestsFailureWarning)
     return SafeResponse(success=False)
 
 
