@@ -12,4 +12,4 @@ from requests.exceptions import (
 )
 
 from .api import request, get, options, head, post, put, patch, delete
-from .model import SafeResponse
+from .model import SafeResponse, StatusFilter
