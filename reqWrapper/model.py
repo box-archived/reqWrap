@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from requests import Response, Session
-from typing import Union
 
 
 class SafeResponse(object):
