@@ -2,7 +2,6 @@
 
 from time import sleep
 from requests import Session
-from warnings import warn
 from .model import SafeResponse
 
 
