@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='reqWrapper',
-    version='0.1.0',
+    version='0.1.1',
     packages=['reqWrapper'],
     url='https://github.com/box-archived/reqWrap',
     license='Apache License 2.0',
