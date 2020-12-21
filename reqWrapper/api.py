@@ -3,11 +3,17 @@
 from time import sleep
 from requests import Session
 from warnings import warn
-from .model import SafeResponse
+from .model import SafeResponse, StatusFilter
 
 
-def request(method, url, session=None, retry=5, wait=1, need_200=False, **kwargs):
+def request(method, url, session=None, retry=5, wait=1, status=None, **kwargs):
     session: Session
+    if status is None:
+        status = []
+    elif type(status) == int:
+        status = [status]
+    if type(status) == list:
+        status = StatusFilter(status)
     if session is None:
         session = Session()
 
@@ -20,16 +26,14 @@ def request(method, url, session=None, retry=5, wait=1, need_200=False, **kwargs
         try:
             res = session.request(method=method, url=url, **kwargs)
             session.close()
-            if need_200 and res.status_code != 200:
-                continue
-            else:
+            if status.compile(res.status_code):
                 return SafeResponse(success=True, response=res, session=session)
         except Exception:
             continue
     return SafeResponse(success=False)
 
 
-def get(url, params=None, session=None, retry=5, wait=1, need_200=False, **kwargs):
+def get(url, params=None, session=None, retry=5, wait=1, status=None, **kwargs):
     r"""Sends a GET request.
 
     :param url: URL for the new :class:`Request` object.
@@ -39,18 +43,17 @@ def get(url, params=None, session=None, retry=5, wait=1, need_200=False, **kwarg
     :type session: requests.Session
     :param retry: Max retry count.
     :param wait: Time(seconds) between retry
-    :param need_200: Set True if you only need status code 200
-        else -> fail
+    :param status: Response status code filter
     :param \*\*kwargs: Optional arguments that ``request`` takes.
     :return: :class:`Response <Response>` object
     :rtype: reqWrapper.SafeResponse
     """
 
     kwargs.setdefault('allow_redirects', True)
-    return request('get', url, params=params, session=session, retry=retry, wait=wait, need_200=need_200, **kwargs)
+    return request('get', url, params=params, session=session, retry=retry, wait=wait, status=status, **kwargs)
 
 
-def options(url, session=None, retry=5, wait=1, need_200=False, **kwargs):
+def options(url, session=None, retry=5, wait=1, status=None, **kwargs):
     r"""Sends an OPTIONS request.
 
     :param url: URL for the new :class:`Request` object.
@@ -58,18 +61,17 @@ def options(url, session=None, retry=5, wait=1, need_200=False, **kwargs):
     :type session: requests.Session
     :param retry: Max retry count.
     :param wait: Time(seconds) between retry
-    :param need_200: Set True if you only need status code 200
-        else -> fail
+    :param status: Response status code filter
     :param \*\*kwargs: Optional arguments that ``request`` takes.
     :return: :class:`Response <Response>` object
     :rtype: reqWrapper.SafeResponse
     """
 
     kwargs.setdefault('allow_redirects', True)
-    return request('options', url, session=session, retry=retry, wait=wait, need_200=need_200, **kwargs)
+    return request('options', url, session=session, retry=retry, wait=wait, status=status, **kwargs)
 
 
-def head(url, session=None, retry=5, wait=1, need_200=False, **kwargs):
+def head(url, session=None, retry=5, wait=1, status=None, **kwargs):
     r"""Sends a HEAD request.
 
     :param url: URL for the new :class:`Request` object.
@@ -77,8 +79,7 @@ def head(url, session=None, retry=5, wait=1, need_200=False, **kwargs):
     :type session: requests.Session
     :param retry: Max retry count.
     :param wait: Time(seconds) between retry
-    :param need_200: Set True if you only need status code 200
-        else -> fail
+    :param status: Response status code filter
     :param \*\*kwargs: Optional arguments that ``request`` takes. If
         `allow_redirects` is not provided, it will be set to `False` (as
         opposed to the default :meth:`request` behavior).
@@ -87,10 +88,10 @@ def head(url, session=None, retry=5, wait=1, need_200=False, **kwargs):
     """
 
     kwargs.setdefault('allow_redirects', False)
-    return request('head', url, session=session, retry=retry, wait=wait, need_200=need_200, **kwargs)
+    return request('head', url, session=session, retry=retry, wait=wait, status=status, **kwargs)
 
 
-def post(url, data=None, json=None, session=None, retry=5, wait=1, need_200=False, **kwargs):
+def post(url, data=None, json=None, session=None, retry=5, wait=1, status=None, **kwargs):
     r"""Sends a POST request.
 
     :param url: URL for the new :class:`Request` object.
@@ -101,18 +102,17 @@ def post(url, data=None, json=None, session=None, retry=5, wait=1, need_200=Fals
     :type session: requests.Session
     :param retry: Max retry count.
     :param wait: Time(seconds) between retry
-    :param need_200: Set True if you only need status code 200
-        else -> fail
+    :param status: Response status code filter
     :param \*\*kwargs: Optional arguments that ``request`` takes.
     :return: :class:`Response <Response>` object
     :rtype: reqWrapper.SafeResponse
     """
 
     return request('post', url, data=data, json=json, session=session,
-                   retry=retry, wait=wait, need_200=need_200, **kwargs)
+                   retry=retry, wait=wait, status=status, **kwargs)
 
 
-def put(url, data=None, session=None, retry=5, wait=1, need_200=False, **kwargs):
+def put(url, data=None, session=None, retry=5, wait=1, status=None, **kwargs):
     r"""Sends a PUT request.
 
     :param url: URL for the new :class:`Request` object.
@@ -123,17 +123,16 @@ def put(url, data=None, session=None, retry=5, wait=1, need_200=False, **kwargs)
     :type session: requests.Session
     :param retry: Max retry count.
     :param wait: Time(seconds) between retry
-    :param need_200: Set True if you only need status code 200
-        else -> fail
+    :param status: Response status code filter
     :param \*\*kwargs: Optional arguments that ``request`` takes.
     :return: :class:`Response <Response>` object
     :rtype: reqWrapper.SafeResponse
     """
 
-    return request('put', url, data=data, session=session, retry=retry, wait=wait, need_200=need_200, **kwargs)
+    return request('put', url, data=data, session=session, retry=retry, wait=wait, status=status, **kwargs)
 
 
-def patch(url, data=None, session=None, retry=5, wait=1, need_200=False, **kwargs):
+def patch(url, data=None, session=None, retry=5, wait=1, status=None, **kwargs):
     r"""Sends a PATCH request.
 
     :param url: URL for the new :class:`Request` object.
@@ -144,17 +143,16 @@ def patch(url, data=None, session=None, retry=5, wait=1, need_200=False, **kwarg
     :type session: requests.Session
     :param retry: Max retry count.
     :param wait: Time(seconds) between retry
-    :param need_200: Set True if you only need status code 200
-        else -> fail
+    :param status: Response status code filter
     :param \*\*kwargs: Optional arguments that ``request`` takes.
     :return: :class:`Response <Response>` object
     :rtype: reqWrapper.SafeResponse
     """
 
-    return request('patch', url, data=data, session=session, retry=retry, wait=wait, need_200=need_200, **kwargs)
+    return request('patch', url, data=data, session=session, retry=retry, wait=wait, status=status, **kwargs)
 
 
-def delete(url, session=None, retry=5, wait=1, need_200=False, **kwargs):
+def delete(url, session=None, retry=5, wait=1, status=None, **kwargs):
     r"""Sends a DELETE request.
 
     :param url: URL for the new :class:`Request` object.
@@ -162,11 +160,10 @@ def delete(url, session=None, retry=5, wait=1, need_200=False, **kwargs):
     :type session: requests.Session
     :param retry: Max retry count.
     :param wait: Time(seconds) between retry
-    :param need_200: Set True if you only need status code 200
-        else -> fail
+    :param status: Response status code filter
     :param \*\*kwargs: Optional arguments that ``request`` takes.
     :return: :class:`Response <Response>` object
     :rtype: reqWrapper.SafeResponse
     """
 
-    return request('delete', url, session=session, retry=retry, wait=wait, need_200=need_200, **kwargs)
+    return request('delete', url, session=session, retry=retry, wait=wait, status=status, **kwargs)
