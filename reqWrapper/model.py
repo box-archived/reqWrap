@@ -96,7 +96,7 @@ class StatusFilter(set):
 
         return list(positive)
 
-    def compile(self, status_code):
+    def check(self, status_code):
         r""" Test :param `status_code` is pass
 
         :param status_code:

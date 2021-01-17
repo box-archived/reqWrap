@@ -25,7 +25,7 @@ def request(method, url, session=None, retry=5, wait=1, status=None, **kwargs):
         try:
             res = session.request(method=method, url=url, **kwargs)
             session.close()
-            if status.compile(res.status_code):
+            if status.check(res.status_code):
                 return SafeResponse(success=True, response=res, session=session)
         except Exception:
             continue
